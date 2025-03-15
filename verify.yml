@@ -1,0 +1,46 @@
+---
+- name: Verify OpenJDK, Maven, Gradle, and Jenkins Installation on Localhost
+  hosts: localhost
+  become: yes
+  become_method: sudo  # Explicitly set sudo as become method
+  tasks:
+
+    - name: Check Java Version
+      command: java -version
+      register: java_version
+      ignore_errors: yes
+      changed_when: false
+
+    - name: Display Java Version
+      debug:
+        msg: "{{ java_version.stderr_lines | default([]) | join('\n') if java_version.rc == 0 else 'Java is NOT installed' }}"
+
+    - name: Check Maven Version
+      command: mvn -version
+      register: maven_version
+      ignore_errors: yes
+      changed_when: false
+
+    - name: Display Maven Version
+      debug:
+        msg: "{{ maven_version.stdout_lines | default([]) | join('\n') if maven_version.rc == 0 else 'Maven is NOT installed' }}"
+
+    - name: Check Gradle Version
+      command: gradle -v
+      register: gradle_version
+      ignore_errors: yes
+      changed_when: false
+
+    - name: Display Gradle Version
+      debug:
+        msg: "{{ gradle_version.stdout_lines | default([]) | join('\n') if gradle_version.rc == 0 else 'Gradle is NOT installed' }}"
+
+    - name: Check if Jenkins Service is Running
+      command: systemctl is-active jenkins
+      register: jenkins_status
+      ignore_errors: yes
+      changed_when: false
+
+    - name: Display Jenkins Status
+      debug:
+        msg: "{{ 'Jenkins is running' if jenkins_status.stdout == 'active' else 'Jenkins is NOT running' }}"
