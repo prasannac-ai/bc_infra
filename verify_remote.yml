@@ -1,6 +1,6 @@
 ---
 - name: Verify OpenJDK, Maven, Gradle, and Jenkins Installation on Localhost
-  hosts: localhost
+  hosts: ubuntu1
   become: yes
   become_method: sudo  # Explicitly set sudo as become method
   tasks:

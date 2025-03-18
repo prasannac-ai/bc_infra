@@ -1,0 +1,101 @@
+---
+- name: Install OpenJDK 17, Maven, Gradle, and Jenkins
+  hosts: ubuntu1
+  become: yes
+  become_method: sudo
+  tasks:
+  
+    - name: Update apt package index
+      apt:
+        update_cache: yes
+
+    - name: Install dependencies (Java, curl, gnupg)
+      apt:
+        name:
+          - openjdk-17-jdk
+          - curl
+          - gnupg
+        state: present
+
+    - name: Verify Java Installation
+      command: java -version
+      register: java_version
+      changed_when: false
+
+    - debug:
+        msg: "Installed Java Version: {{ java_version.stdout }}"
+
+    - name: Install Maven
+      apt:
+        name: maven
+        state: present
+
+    - name: Download Gradle latest release
+      get_url:
+        url: "https://services.gradle.org/distributions/gradle-8.7-bin.zip"
+        dest: "/tmp/gradle-latest.zip"
+
+    - name: Extract Gradle to /opt/gradle
+      unarchive:
+        src: "/tmp/gradle-latest.zip"
+        dest: "/opt/"
+        remote_src: yes
+
+    - name: Ensure /opt/gradle does not exist (Remove if necessary)
+      file:
+        path: /opt/gradle
+        state: absent
+
+    - name: Create a symbolic link for Gradle
+      file:
+        src: "/opt/gradle-8.7"
+        dest: "/opt/gradle"
+        state: link
+
+    - name: Add Gradle to system PATH
+      lineinfile:
+        path: /etc/profile.d/gradle.sh
+        line: 'export PATH=$PATH:/opt/gradle/bin'
+        create: yes
+        mode: '0755'
+
+    - name: Source Gradle environment variables
+      shell: source /etc/profile.d/gradle.sh
+      args:
+        executable: /bin/bash
+        
+    - name: Add Jenkins Repository Key (New Secure Method)
+      ansible.builtin.get_url:
+        url: https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+        dest: /usr/share/keyrings/jenkins-keyring.asc
+        mode: '0644'
+
+    - name: Add Jenkins Repository
+      ansible.builtin.lineinfile:
+        path: /etc/apt/sources.list.d/jenkins.list
+        line: "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/"
+        create: yes
+
+    - name: Update apt package index (after fixing Jenkins repo)
+      apt:
+        update_cache: yes
+
+    - name: Install Jenkins
+      apt:
+        name: jenkins
+        state: present
+
+    - name: Enable and Start Jenkins Service
+      systemd:
+        name: jenkins
+        enabled: yes
+        state: started
+
+    - name: Fetch Jenkins Initial Admin Password
+      command: cat /var/lib/jenkins/secrets/initialAdminPassword
+      register: jenkins_password
+      changed_when: false
+
+    - name: Display Initial Admin Password
+      debug:
+        msg: "Jenkins initial password: {{ jenkins_password.stdout }}"
