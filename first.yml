@@ -1,0 +1,8 @@
+---
+- name: "write to a single new file where the target machine is windows"
+  hosts: ubuntu1
+  tasks:
+    - name: "write to a file"
+      copy:
+        content: "Hello, World!"
+        dest: "/tmp/hello.txt"
