@@ -1,5 +1,5 @@
 ---
-- name: "write to a single new file where the target machine is windows"
+- name: "write to a single new file "to the target machi"ne
   hosts: ubuntu1
   tasks:
     - name: "write to a file"
