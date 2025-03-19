@@ -1,1 +1,1 @@
-# verify and install the softwares
+# verify and install the softwares.
