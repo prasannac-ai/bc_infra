@@ -4,5 +4,5 @@
   tasks:
     - name: "write to a file"
       copy:
-        content: "Hello, World...!"
+        content: "Hello, World... thank you!"
         dest: "/tmp/hello.txt"
