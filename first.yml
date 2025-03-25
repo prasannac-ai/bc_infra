@@ -1,8 +1,8 @@
 ---
-- name: "write to a single new file "to the target machine"
-  hosts: ubuntu1
+- name: "write to a single new file to the target machine"
+  hosts: localhost
   tasks:
     - name: "write to a file"
       copy:
-        content: "Hello, World!"
+        content: "Hello, World...!"
         dest: "/tmp/hello.txt"
